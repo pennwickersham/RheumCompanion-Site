@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RheumCompanion — a record your rheumatologist can read</title>
+<meta name="description" content="A symptom and flare tracker for rheumatoid arthritis, lupus, psoriatic arthritis and other autoimmune conditions. Built by a board-certified rheumatologist. Your data stays on your device.">
+<meta property="og:title" content="RheumCompanion — a record your rheumatologist can read">
+<meta property="og:description" content="Track symptoms, flares, medications and labs. Walk into your appointment with data instead of memory.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.rheumcompanion.com/">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Update the absolute URLs above if the site moves to a different domain -->
+<link rel="canonical" href="https://www.rheumcompanion.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#152F38;        /* deep teal-slate: all primary text */
+  --ink-2:#4A646D;      /* secondary text */
+  --ink-3:#7C919A;      /* tertiary, captions */
+  --paper:#F2F5F6;      /* cool pale ground */
+  --paper-2:#FFFFFF;
+  --line:#D3DDE0;       /* hairlines */
+  --teal:#1F6F6B;       /* primary action / calm */
+  --teal-dk:#155450;
+  --flare:#B23A48;      /* inflammation */
+  --flare-soft:#E8B3B4;
+  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --measure:34rem;
+  --pad:clamp(20px,5vw,56px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--pad)}
+a{color:var(--teal-dk)}
+a:focus-visible,button:focus-visible{outline:2.5px solid var(--teal);outline-offset:3px;border-radius:2px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;letter-spacing:-.01em}
+
+/* ============ NAV ============ */
+.nav{border-bottom:1px solid var(--line);background:var(--paper-2)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:68px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);text-decoration:none;
+  display:flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px;flex:none}
+.nav .links{display:flex;gap:26px;font-size:15px}
+.nav .links a{color:var(--ink-2);text-decoration:none}
+.nav .links a:hover{color:var(--teal-dk);text-decoration:underline}
+@media(max-width:640px){.nav .links{display:none}}
+
+/* ============ HERO ============ */
+.hero{background:var(--paper-2);border-bottom:1px solid var(--line);padding:clamp(44px,7vw,84px) 0 0}
+.hero h1{font-size:clamp(34px,5.6vw,58px);max-width:16ch}
+.hero .sub{font-size:clamp(18px,2.2vw,21px);color:var(--ink-2);max-width:var(--measure);margin-top:20px}
+.stores{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.store-btn{display:inline-flex;flex-direction:column;justify-content:center;
+  padding:10px 20px;border:1.5px solid var(--ink);border-radius:8px;
+  text-decoration:none;color:var(--ink);background:transparent;min-width:170px}
+.store-btn span{font-size:11.5px;color:var(--ink-2);letter-spacing:.02em}
+.store-btn strong{font-size:17px;font-weight:600;line-height:1.2}
+.store-btn:hover{background:var(--ink);color:var(--paper-2)}
+.store-btn:hover span{color:#B9CBD0}
+.meta{margin-top:16px;font-size:14.5px;color:var(--ink-3)}
+
+/* ---- the record strip: the one bold element ---- */
+.record{margin-top:clamp(40px,6vw,68px);padding-bottom:clamp(34px,5vw,52px)}
+.record-grid{display:grid;grid-template-columns:repeat(30,1fr);gap:3px;max-width:900px}
+.record-grid i{display:block;aspect-ratio:1;border-radius:1.5px;background:#DCE5E7}
+.record-grid i.lo{background:var(--flare-soft)}
+.record-grid i.hi{background:var(--flare)}
+.record-cap{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap;
+  margin-top:16px;font-size:14px;color:var(--ink-3);max-width:900px}
+.key{display:inline-flex;align-items:center;gap:7px}
+.key b{width:11px;height:11px;border-radius:2px;display:inline-block}
+@media(prefers-reduced-motion:no-preference){
+  .record-grid i{animation:fill .5s both}
+}
+@keyframes fill{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ============ SECTIONS ============ */
+section{padding:clamp(48px,7vw,84px) 0}
+section + section{border-top:1px solid var(--line)}
+.lede{font-family:var(--serif);font-size:clamp(22px,3.2vw,30px);line-height:1.35;max-width:22ch}
+.body{max-width:var(--measure);margin-top:22px;color:var(--ink-2)}
+.body p + p{margin-top:16px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(28px,5vw,64px);align-items:start}
+@media(max-width:800px){.two{grid-template-columns:1fr}}
+
+/* ---- feature list: hairline-separated entries, not cards ---- */
+.feat{border-top:1px solid var(--line)}
+.feat div{padding:20px 0;border-bottom:1px solid var(--line)}
+.feat h3{font-size:19px;margin-bottom:5px}
+.feat p{color:var(--ink-2);font-size:16px;max-width:46ch}
+.group-title{font-size:14.5px;color:var(--ink-3);margin-bottom:10px}
+
+/* ---- conditions ---- */
+.conds{font-family:var(--serif);font-size:clamp(19px,2.6vw,25px);line-height:1.5;
+  color:var(--ink);max-width:40ch}
+.conds em{font-style:normal;color:var(--ink-3)}
+
+/* ---- privacy callout: the quiet counterweight ---- */
+.quiet{background:var(--ink);color:#DCE7EA}
+.quiet h2{color:var(--paper-2)}
+.quiet .body{color:#B9CBD0}
+.quiet a{color:#8FD3CB}
+.vows{margin-top:26px;border-top:1px solid rgba(255,255,255,.16);max-width:var(--measure)}
+.vows div{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.16)}
+.vows b{display:block;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--paper-2)}
+.vows span{font-size:15.5px;color:#A8BEC4}
+
+/* ---- price ---- */
+.price{font-family:var(--serif);font-size:clamp(26px,3.6vw,34px);line-height:1.3;max-width:24ch}
+.price small{display:block;font-family:var(--sans);font-size:16px;color:var(--ink-2);margin-top:14px;line-height:1.6}
+
+/* ---- author ---- */
+.author-name{font-family:var(--serif);font-size:22px;font-weight:600}
+.author-role{font-size:15px;color:var(--ink-3);margin-bottom:14px}
+
+/* ---- sibling products ---- */
+.fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0;
+  border-top:1px solid var(--line);margin-top:26px}
+.fam article{padding:22px 0;border-bottom:1px solid var(--line)}
+.fam article + article{border-left:1px solid var(--line);padding-left:26px}
+@media(max-width:780px){.fam article + article{border-left:0;padding-left:0}}
+.fam h3{font-size:18px;margin-bottom:6px}
+.fam p{font-size:15.5px;color:var(--ink-2);max-width:36ch}
+.fam .links{margin-top:12px;font-size:15px;display:flex;gap:16px;flex-wrap:wrap}
+
+/* ============ FOOTER ============ */
+footer{background:var(--paper-2);border-top:1px solid var(--line);
+  padding:44px 0 56px;font-size:15px;color:var(--ink-2)}
+footer .flinks{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:22px}
+.disclaim{margin-top:20px;font-size:13.5px;color:var(--ink-3);max-width:70ch;line-height:1.55}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="#1F6F6B"/>
+        <path d="M6 20 L11 20 L13 13 L16 25 L19 9 L21.5 20 L26 20" fill="none"
+          stroke="#F2F5F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      RheumCompanion
+    </a>
+    <div class="links">
+      <a href="#what">What it does</a>
+      <a href="#conditions">Conditions</a>
+      <a href="#sources">Sources</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#get">Get the app</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Your rheumatologist gets twenty minutes. Give them a year.</h1>
+    <p class="sub">RheumCompanion keeps the daily record — symptoms, flares, medications,
+      labs — so your next appointment starts from data instead of memory. Built by a
+      board-certified rheumatologist who lives with ankylosing spondylitis.</p>
+
+    <div class="stores">
+      <a class="store-btn" href="https://apps.apple.com/us/app/rheumcompanion-flare-tracker/id6784212388">
+        <span>Download on the</span><strong>App Store</strong>
+      </a>
+      <a class="store-btn" href="https://play.google.com/store/apps/details?id=com.rheumcompanion.app">
+        <span>Get it on</span><strong>Google Play</strong>
+      </a>
+    </div>
+    <p class="meta">Free to download. 7-day free trial, then $6.99/month. Cancel anytime.</p>
+
+    <div class="record">
+      <div class="record-grid" id="strip" aria-hidden="true"></div>
+      <p class="record-cap">
+        <span>Ninety days, the way the app sees them.</span>
+        <span class="key"><b style="background:#DCE5E7"></b> quiet day</span>
+        <span class="key"><b style="background:#E8B3B4"></b> symptoms logged</span>
+        <span class="key"><b style="background:#B23A48"></b> flare</span>
+      </p>
+    </div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap two">
+    <div>
+      <h2 class="lede">Two halves that need each other.</h2>
+    </div>
+    <div>
+      <p class="body">Most tracking apps give you a place to write things down and leave you
+        there. Most reference apps explain your disease without knowing anything about you.
+        RheumCompanion does both, because the question you actually bring to an appointment
+        sits between them: <em>is this normal for my condition, or is this my condition
+        getting worse?</em></p>
+
+      <div class="group-title">Your record</div>
+      <div class="feat" style="margin-bottom:34px">
+        <div><h3>Daily symptoms and joint pain</h3>
+          <p>Log pain, fatigue and stiffness in a few taps, on the days you can manage it.</p></div>
+        <div><h3>Flare tracking</h3>
+          <p>Record a flare as it happens, with severity and duration, while the details are fresh.</p></div>
+        <div><h3>Diet and symptom correlation</h3>
+          <p>See how what you eat lines up with how you feel, over enough days to mean something.</p></div>
+        <div><h3>Medications and infusion dates</h3>
+          <p>Your regimen and biologic infusion schedule in one place, including what you have stopped.</p></div>
+        <div><h3>Lab history</h3>
+          <p>Keep results together so a trend is visible instead of scattered across portals.</p></div>
+        <div><h3>Appointment summary</h3>
+          <p>Export a 30-day report to hand your care team at the start of a visit.</p></div>
+        <div><h3>Search across everything</h3>
+          <p>Find a symptom, a date or a medication anywhere in your record.</p></div>
+      </div>
+
+      <div class="group-title">The reference library</div>
+      <div class="feat">
+        <div><h3>Disease encyclopedia</h3>
+          <p>Thirteen conditions explained in plain language, without the hedging.</p></div>
+        <div><h3>Medication reference</h3>
+          <p>Seven drug classes, drawn from FDA package insert information.</p></div>
+        <div><h3>RheumBot</h3>
+          <p>Ask a question, get a plain-language answer with its sources attached.</p></div>
+        <div><h3>Drug interaction checker</h3>
+          <p>Results grouped by severity, each with a clinical explanation of why it matters.</p></div>
+        <div><h3>Clinical trial finder</h3>
+          <p>See what is recruiting for your condition.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="conditions">
+  <div class="wrap two">
+    <div><h2 class="lede">Built for the conditions it names.</h2></div>
+    <div>
+      <p class="conds">Rheumatoid arthritis, lupus, psoriatic arthritis, Sjögren's syndrome,
+        ankylosing spondylitis, gout, scleroderma, vasculitis, fibromyalgia
+        <em>— and other autoimmune and inflammatory conditions.</em></p>
+      <p class="body">If your diagnosis is on that list, the tracking fields, the encyclopedia
+        entries and the medication reference were written with it in mind. Nothing here is a
+        general wellness template with rheumatology vocabulary pasted over it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap two">
+    <div><h2 class="lede">Every claim carries its source.</h2></div>
+    <div>
+      <p class="body">Medication information comes from FDA drug labels. Clinical content is
+        drawn from published research indexed in PubMed. Where the app tells you something,
+        it shows you where that came from, so you can take it to your rheumatologist and
+        they can check it.</p>
+      <p class="body" style="margin-top:16px">That is deliberate. A patient-facing app that
+        speaks confidently without citation is asking you to trust it more than it has
+        earned.</p>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="quiet">
+  <div class="wrap two">
+    <div><h2 class="lede">Your health record stays yours.</h2></div>
+    <div>
+      <p class="body">Apple's App Privacy report for RheumCompanion reads
+        <strong>Data Not Collected</strong>. That is not a marketing line — it is the
+        declaration the developer files with Apple, and it is the one they hold you to.</p>
+      <div class="vows">
+        <div><b>Nothing leaves your phone unasked</b>
+          <span>Your logs live on your device. Exports happen when you choose to make one.</span></div>
+        <div><b>No ads and no data sale</b>
+          <span>There is no advertising business here to feed.</span></div>
+        <div><b>No account required to start</b>
+          <span>Open the app and begin logging.</span></div>
+      </div>
+      <p class="body" style="margin-top:22px">
+        <a href="https://pennwickersham.github.io/rheumatology-app/privacy.html">Read the full privacy policy</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="get">
+  <div class="wrap two">
+    <div><h2 class="lede">What it costs.</h2></div>
+    <div>
+      <p class="price">Free to download. Seven days free, then $6.99 a month.
+        <small>Cancel anytime from your phone's subscription settings. Requires iOS 15 or
+        later, or a recent Android device.</small></p>
+      <div class="stores">
+        <a class="store-btn" href="https://apps.apple.com/us/app/rheumcompanion-flare-tracker/id6784212388">
+          <span>Download on the</span><strong>App Store</strong>
+        </a>
+        <a class="store-btn" href="https://play.google.com/store/apps/details?id=com.rheumcompanion.app">
+          <span>Get it on</span><strong>Google Play</strong>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="author">
+  <div class="wrap two">
+    <div><h2 class="lede">Who built it.</h2></div>
+    <div>
+      <p class="author-name">Pendleton B. Wickersham, MD</p>
+      <p class="author-role">FACP, FACR — board-certified rheumatologist</p>
+      <p class="body" style="margin-top:0">Dr. Wickersham was diagnosed with ankylosing
+        spondylitis at twenty-two, and has spent his career since on the other side of the
+        exam room. RheumCompanion is the record he wishes every patient walked in with, and
+        the answers he does not have time to give in full during a visit.</p>
+      <p class="body">It is published by
+        <a href="https://brewsterwickershampublications.com">Brewster Wickersham Publications</a>,
+        an independent press making books, workbooks and apps for people living with chronic
+        pain and rheumatic disease.</p>
+
+      <div class="fam">
+        <article>
+          <h3>SootheQuest</h3>
+          <p>A match-3 game with every pressure mechanic removed, for days when you have
+            nothing left to give a game.</p>
+          <div class="links">
+            <a href="https://www.soothequest.com">soothequest.com</a>
+            <a href="https://apps.apple.com/us/app/soothequest/id6791187064">App Store</a>
+            <a href="https://play.google.com/store/apps/details?id=com.brewsterwickershampublications.soothequest">Google Play</a>
+          </div>
+        </article>
+        <article>
+          <h3>The Resilient Path</h3>
+          <p>The book, workbook and app on managing life with chronic pain, written with
+            Louise Locker, LCSW.</p>
+          <div class="links">
+            <a href="https://theresilientpathbook.com">theresilientpathbook.com</a>
+            <a href="https://apps.apple.com/us/app/resilient-path/id6762085688">App Store</a>
+            <a href="https://play.google.com/store/apps/details?id=resilient.path.app">Google Play</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="flinks">
+      <a href="https://pennwickersham.github.io/rheumatology-app/privacy.html">Privacy Policy</a>
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of Use</a>
+      <a href="https://brewsterwickershampublications.com">Brewster Wickersham Publications</a>
+      <a href="https://www.soothequest.com">SootheQuest</a>
+      <a href="https://theresilientpathbook.com">The Resilient Path</a>
+      <a href="mailto:info@brewsterwickershampublications.com">Contact</a>
+    </div>
+    <p>© 2026 Brewster Wickersham Publications. RheumCompanion is published by
+      Wickersham Development Group, LLC.</p>
+    <p class="disclaim">RheumCompanion is an educational and personal health record tool. It
+      is not a medical device, and it does not provide medical advice, diagnosis or treatment
+      recommendations. Always consult your rheumatologist or another qualified health
+      provider about your care. Never delay seeking medical advice because of something you
+      read in this app.</p>
+  </div>
+</footer>
+
+<script>
+/* The record strip: a plausible 90 days — mostly quiet, two flare clusters.
+   Fixed pattern rather than random, so the page looks the same on every load. */
+(function(){
+  var el=document.getElementById('strip'); if(!el) return;
+  var lo=[4,5,12,19,20,26,33,41,42,55,63,70,71,78,85];
+  var hi=[13,14,15,16,27,28,56,57,58,72,73];
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var out='';
+  for(var d=0;d<90;d++){
+    var cls=hi.indexOf(d)>-1?'hi':(lo.indexOf(d)>-1?'lo':'');
+    var delay=reduce?0:(d*0.012).toFixed(3);
+    out+='<i class="'+cls+'" style="animation-delay:'+delay+'s"></i>';
+  }
+  el.innerHTML=out;
+})();
+</script>
+
+</body>
+</html>
